@@ -371,12 +371,7 @@ else {
     );
 }
 
-        g.setColor(Color.RED);
-        g.drawString(
-            "HP: " + enemy.getHealth(),
-            enemy.getX() - cameraX,
-            enemy.getY() - 20
-        );
+       
 
        if(collisionDetection()
     && currentMove != null
@@ -416,21 +411,105 @@ else {
 
     backButtons.get(2).drawQs(g);
 
-     // Player HP text
-    g.setColor(Color.GREEN);
-    g.setFont(new Font("Arial", Font.BOLD, 30));
-
-    g.drawString(
-    "Player HP: " + mainFighter.getHealth(),
-    mainFighter.getX() - 50,
-    mainFighter.getY() - 50
-    );
+    
 
     if(loseCheck()) {
         g.setColor(Color.RED);
         g.setFont(new Font("Arial", Font.BOLD, 50));
         g.drawString("You Lose!", screenWidth / 2 - 100, screenHeight / 2);
     }
+
+    // =====================
+// PLAYER HEALTH BAR
+// =====================
+
+int maxHealth = 100;
+int maxStam = 20;
+
+g.setColor(Color.GRAY);
+g.fillRect(50, 130, 300, 25);
+
+g.setColor(Color.GREEN);
+g.fillRect(
+    50,
+    130,
+    (int)(300 * (mainFighter.getHealth() / (double)maxHealth)),
+    25
+);
+
+g.setColor(Color.WHITE);
+g.drawRect(50, 130, 300, 25);
+g.setFont(new Font("Arial", Font.BOLD, 15));
+g.drawString(
+    "HP: " + mainFighter.getHealth(), 130, 145);
+
+// =====================
+// PLAYER STAMINA BAR
+// =====================
+
+g.setColor(Color.GRAY);
+g.fillRect(50, 150, 300, 15);
+
+g.setColor(Color.CYAN);
+g.fillRect(
+    50,
+    150,
+    (int)(300 * (mainFighter.getStam() / (double)maxStam)),
+    15
+);
+
+g.setColor(Color.WHITE);
+g.drawRect(50, 150, 300, 15);
+
+g.setFont(new Font("Arial", Font.BOLD, 15));
+g.drawString(
+    "Stamina: " + mainFighter.getStam(), 110,  165);
+
+if(enemy != null) {
+
+    // Enemy Health
+    g.setColor(Color.GRAY);
+    g.fillRect(screenWidth - 340, 20, 300, 25);
+
+    g.setColor(Color.RED);
+    g.fillRect(
+        screenWidth - 340,
+        20,
+        (int)(300 * (enemy.getHealth() / 100.0)),
+        25);
+
+    g.setColor(Color.WHITE);
+    g.drawRect(screenWidth - 340, 20, 300, 25);
+
+
+    g.setFont(new Font("Arial", Font.BOLD, 15));
+    g.drawString(
+        "Enemy HP: " + enemy.getHealth(),
+        screenWidth - 250,
+        38
+    );
+
+    // Enemy Stamina
+    g.setColor(Color.GRAY);
+    g.fillRect(screenWidth - 340, 55, 300, 15);
+
+    g.setColor(Color.ORANGE);
+    g.fillRect(
+        screenWidth - 340,
+        55,
+        (int)(300 * (enemy.getStam() / 20.0)),
+        15
+    );
+
+    g.setColor(Color.WHITE);
+    g.drawRect(screenWidth - 340, 55, 300, 15);
+    g.setFont(new Font("Arial", Font.BOLD, 15));
+    g.drawString(
+        "Enemy Stamina: " + enemy.getStam(),
+        screenWidth - 250,
+        68
+    );
+}
 }
 
     private Queue<Enemies> setEs() {
@@ -451,7 +530,7 @@ else {
     double damage = move.getDamage();
 
     // fighter stat
-    damage += attacker.getDamage();
+    damage += attacker.getDamage()*attacker.getStam();
 
     // low stamina penalty
     if(attacker.getStam() <= 15){
@@ -467,58 +546,24 @@ else {
 
    
 }
+/*finish stam method nxt class */
+private int getStam(Fighters attacker, Enemies defender, Moves move) {
 
-    /*private void checkMoveCollision() {
-
-    if(currentMove == null) {
-        return;
+    int stam = attacker.getStam() - move.getStamCost();
+    // low stamina penalty
+    if(attacker.getStam() <= 15){
+        stam *= 2;
     }
 
-    if(enemies.isEmpty()) {
-        return;
+    // very low stamina
+    if(attacker.getStam() <= 5){
+        stam *= 3;
     }
 
-    Enemies enemy = enemies.peek();
+    return stam;
+}
 
-    int fighterFront =
-        mainFighter.getX() + (int)mainFighter.getW();
-
-    int enemyFront =
-        enemy.getX();
-
-    int distance =
-        enemyFront - fighterFront;
-
-    if(distance <= currentMove.getRange() * 50) {
-
-        int finalDamage =
-            getStrikeDamage(
-                mainFighter,
-                enemy,
-                currentMove
-            );
-
-        enemy.takeDamage(finalDamage);
-
-        System.out.println(
-            "Hit for " + finalDamage +
-            " damage! Enemy HP: " +
-            enemy.getHealth()
-        );
-
-        if(enemy.isDead()) {
-
-            enemies.remove();
-
-            if(enemies.isEmpty()) {
-                System.out.println("All enemies defeated!");
-            }
-        }
-
-        currentMove = null;
-    }
-}*/
-
+   
 private boolean collisionDetection() {
 //System.out.println("calling it at least");
     boolean collisionDetected = false;
@@ -650,5 +695,55 @@ private Boolean loseCheck() {
     }
     return false;}
 
-	
+	 /* old collision method: private void checkMoveCollision() {
+
+    if(currentMove == null) {
+        return;
+    }
+
+    if(enemies.isEmpty()) {
+        return;
+    }
+
+    Enemies enemy = enemies.peek();
+
+    int fighterFront =
+        mainFighter.getX() + (int)mainFighter.getW();
+
+    int enemyFront =
+        enemy.getX();
+
+    int distance =
+        enemyFront - fighterFront;
+
+    if(distance <= currentMove.getRange() * 50) {
+
+        int finalDamage =
+            getStrikeDamage(
+                mainFighter,
+                enemy,
+                currentMove
+            );
+
+        enemy.takeDamage(finalDamage);
+
+        System.out.println(
+            "Hit for " + finalDamage +
+            " damage! Enemy HP: " +
+            enemy.getHealth()
+        );
+
+        if(enemy.isDead()) {
+
+            enemies.remove();
+
+            if(enemies.isEmpty()) {
+                System.out.println("All enemies defeated!");
+            }
+        }
+
+        currentMove = null;
+    }
+}*/
+
 }

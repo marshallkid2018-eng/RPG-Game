@@ -4,7 +4,7 @@ import javax.swing.ImageIcon;
 public class Moves {
     
     private int x,y,w,h,damage;
-    private int range;  
+    private int range, stamCost;  
     private int attackSpeed;
     private ImageIcon icon;
 
@@ -17,10 +17,11 @@ public class Moves {
         y=0;
         w=0;
         h=0;
+        stamCost = 0;
         icon = new ImageIcon("punch.png");
     }
 
-    public Moves(int x, int y, int w, int h, int damage, int range, int attackSpeed, ImageIcon icon) {
+    public Moves(int x, int y, int w, int h, int damage, int range, int attackSpeed, int stamCost, ImageIcon icon) {
         this.x = x;
         this.y = y;
         this.w = w;
@@ -28,12 +29,13 @@ public class Moves {
         this.damage = damage;
         this.range = range;
         this.attackSpeed = attackSpeed;
+        this.stamCost = stamCost;
         this.icon = icon;
     }
 
     public String toString() {
         return "Damage=" + damage + ", range=" + range + 
-        ", attackSpeed=" + attackSpeed + ", icon=" + icon;
+        ", attackSpeed=" + attackSpeed + ", stamCost=" + stamCost + ", icon=" + icon;
     }
 
     
@@ -111,5 +113,13 @@ public void drawMoves(Graphics g2d, int fighterX, int fighterY, int fighterW, in
 
     public void setIcon(ImageIcon icon) {
         this.icon = icon;
+    }
+
+    public int getStamCost() {
+        return stamCost;
+    }
+
+    public void setStamCost(int stamCost) {
+        this.stamCost = stamCost;
     }
 }

@@ -13,9 +13,9 @@ public class McGregor extends Fighters {
     public McGregor(int x, int y) {
         super(x, y, 300, 300, 20, 
         80, 30, 25, 0,
-         new ImageIcon("conor.png"), new Punches(10, 5, 100, 100, 10, 5, 5, new ImageIcon("punch.png")),
+         new ImageIcon("conor.png"), new Punches(10, 5, 100, 100, 10, 5, 5, 0, new ImageIcon("punch.png")),
         
-         new Punches(10, 5, 300, 300, 10, 5, 5, new ImageIcon("ConorPunchRight.png")));
+         new Punches(10, 5, 300, 300, 10, 5, 5, 0, new ImageIcon("ConorPunchRight.png")));
     }
 
     public String toString() {

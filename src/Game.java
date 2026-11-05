@@ -26,6 +26,8 @@ public class Game extends JPanel  implements Runnable, KeyListener, MouseListene
     private Boolean attackLanded = false;
     private long lastEnemyAttack = 0;
     private Moves enemyCurrentMove;
+    private long lastStaminaRegen = 0;
+
 
 
 	
@@ -184,15 +186,25 @@ public class Game extends JPanel  implements Runnable, KeyListener, MouseListene
         mainFighter.setDx(-5);
     }
 
-    if(key == KeyEvent.VK_J) {
-      currentMove = mainFighter.getMoves().get(0); // Assuming the first move is the punch
-      attackLanded = false;
-    }
+    if(key == KeyEvent.VK_J &&
+   mainFighter.getStam() >=
+   mainFighter.getMoves().get(0).getStamCost()) {
 
-    if(key == KeyEvent.VK_K) {
-      currentMove = mainFighter.getMoves().get(1); // Assuming the second move is the kick
-      attackLanded = false;
-    }
+    currentMove =
+        mainFighter.getMoves().get(0);
+
+    attackLanded = false;
+}
+
+    if(key == KeyEvent.VK_K &&
+   mainFighter.getStam() >=
+   mainFighter.getMoves().get(1).getStamCost()) {
+
+    currentMove =
+        mainFighter.getMoves().get(1);
+
+    attackLanded = false;
+}
     
     if(screen.equals("game")){
     if(key == KeyEvent.VK_SPACE) {
@@ -307,9 +319,10 @@ public void keyReleased(KeyEvent e) {
     Graphics2D g = (Graphics2D) g2d;
 
     // Update game logic
-    mainFighter.move();
+   mainFighter.move();
     updateCamera();
 
+    regenerateStamina();
     // Check attacks
     /*checkMoveCollision();*/
 
@@ -386,7 +399,14 @@ else {
 
     enemy.takeDamage(damage);
 
-    attackLanded = true;
+    int newStam =
+    getStam(mainFighter, enemy, currentMove);
+
+    mainFighter.setStam(
+     Math.max(0, newStam)
+    );
+
+attackLanded = true;
 
     System.out.println(
         "Hit for " + damage +
@@ -530,37 +550,34 @@ if(enemy != null) {
     double damage = move.getDamage();
 
     // fighter stat
-    damage += attacker.getDamage()*attacker.getStam();
+    double staminaPercent =
+    attacker.getStam() / 20.0;
 
-    // low stamina penalty
-    if(attacker.getStam() <= 15){
-        damage *= 0.5;
-    }
-
-    // very low stamina
-    if(attacker.getStam() <= 5){
-        damage *= 0.75;
-    }
+    damage *= (0.5 + staminaPercent);
 
     return (int)Math.round(damage);
 
    
 }
 /*finish stam method nxt class */
-private int getStam(Fighters attacker, Enemies defender, Moves move) {
+private int getStam(
+    Fighters attacker,
+    Enemies defender,
+    Moves move
+) {
 
-    int stam = attacker.getStam() - move.getStamCost();
-    // low stamina penalty
-    if(attacker.getStam() <= 15){
-        stam *= 2;
+    int cost =
+        move.getStamCost();
+
+    if(attacker.getStam() <= 15) {
+        cost *= 2;
     }
 
-    // very low stamina
-    if(attacker.getStam() <= 5){
-        stam *= 3;
+    if(attacker.getStam() <= 5) {
+        cost *= 3;
     }
 
-    return stam;
+    return attacker.getStam() - cost;
 }
 
    
@@ -618,6 +635,12 @@ private void updateEnemyAI(Enemies enemy) {
 
     return;
 }
+
+if(enemy.getStam() <= 0) {
+    enemy.setDx(2); // retreat
+    return;
+}
+
     // too far
     if(distance > 500) {
 
@@ -663,12 +686,21 @@ private void enemyAttack(Enemies enemy) {
     int randomMove =
     (int)(Math.random() * enemy.getMoves().size());
 
-enemyCurrentMove =
-    enemy.getMoves().get(randomMove);
+    enemyCurrentMove = enemy.getMoves().get(randomMove);
+
+    if(enemy.getStam() <
+   enemyCurrentMove.getStamCost()) {
+
+    return;
+}
 
 int damage =
     enemyCurrentMove.getDamage()
     + enemy.getDamage();
+
+enemy.setStam(
+    Math.max( 0, enemy.getStam() - enemyCurrentMove.getStamCost())
+);
 
     mainFighter.setHealth(
         mainFighter.getHealth() - damage
@@ -694,6 +726,40 @@ private Boolean loseCheck() {
         return true;
     }
     return false;}
+
+
+    private void regenerateStamina() {
+
+    long currentTime =
+        System.currentTimeMillis();
+
+        if(currentMove != null) {
+    return;
+    }
+
+    if(currentTime - lastStaminaRegen < 1000) {
+    return;
+    }
+
+    lastStaminaRegen = currentTime;
+
+    if(mainFighter.getStam() < 20) {
+
+        mainFighter.setStam(
+            mainFighter.getStam() + 1
+        );
+    }
+
+    Enemies enemy = enemies.peek();
+
+    if(enemy != null &&
+       enemy.getStam() < 20) {
+
+        enemy.setStam(
+            enemy.getStam() + 1
+        );
+    }
+}
 
 	 /* old collision method: private void checkMoveCollision() {
 

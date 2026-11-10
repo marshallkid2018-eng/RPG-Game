@@ -11,6 +11,7 @@ public class Fighters {
     private int trueW;
     private int trueH;
     private int stam, health, speed, damage, dx;
+    private boolean isFacingRight;
     private ImageIcon pic;
     private ArrayList<Moves> moves = new ArrayList<Moves>();
 
@@ -25,13 +26,14 @@ public class Fighters {
             speed=10;
             damage=10;
             dx=0;
+            isFacingRight=true;
 
             
             pic=new ImageIcon("src/Images/Character.png");
         }
 
         public Fighters(int x, int y, double w, double h, int stam, int health,
-         int speed, int damage, int dx, ImageIcon pic, Moves... moves){
+         int speed, int damage, int dx, boolean isFacingRight, ImageIcon pic, Moves... moves){
             this.x=x;
             this.y=y;
             this.w=w;
@@ -41,7 +43,7 @@ public class Fighters {
             this.speed=speed;
             this.damage=damage;
             this.dx=dx;
-            
+            this.isFacingRight=isFacingRight;
             this.pic=pic;
             for (Moves move : moves) {
         this.moves.add(move);
@@ -220,6 +222,30 @@ public void drawMoves(Graphics g2d) {
 
     public void setDx(int dx) {
         this.dx = dx;
+    }
+
+    public int getTrueW() {
+        return trueW;
+    }
+
+    public void setTrueW(int trueW) {
+        this.trueW = trueW;
+    }
+
+    public int getTrueH() {
+        return trueH;
+    }
+
+    public void setTrueH(int trueH) {
+        this.trueH = trueH;
+    }
+
+    public boolean isFacingRight() {
+        return isFacingRight;
+    }
+
+    public void setFacingRight(boolean isFacingRight) {
+        this.isFacingRight = isFacingRight;
     }
 
     

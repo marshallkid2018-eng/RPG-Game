@@ -8,6 +8,7 @@ public class Enemies {
      private int x,y;
     private double w,h;
     private int stam, health, speed, damage, dx;
+    private boolean isFacingRight;
     private ImageIcon pic;
     private ArrayList<Moves> moves = new ArrayList<Moves>();
 
@@ -21,12 +22,13 @@ public class Enemies {
             speed=10;
             damage=10;
             dx=0;
+            isFacingRight=false;
             
             pic=new ImageIcon("src/Images/Character.png");
         }
 
         public Enemies(int x, int y, double w, double h, int stam, int health,
-         int speed, int damage, int dx, ImageIcon pic, Moves... moves){
+         int speed, int damage, int dx, boolean isFacingRight, ImageIcon pic, Moves... moves){
             this.x=x;
             this.y=y;
             this.w=w;
@@ -36,6 +38,7 @@ public class Enemies {
             this.speed=speed;
             this.damage=damage;
             this.dx=dx;
+            this.isFacingRight=isFacingRight;
             
             this.pic=pic;
             for (Moves move : moves) {
@@ -177,5 +180,13 @@ public class Enemies {
 
         public void setMoves(ArrayList<Moves> moves) {
             this.moves = moves;
+        }
+
+        public boolean isFacingRight() {
+            return isFacingRight;
+        }
+
+        public void setFacingRight(boolean isFacingRight) {
+            this.isFacingRight = isFacingRight;
         }
 }

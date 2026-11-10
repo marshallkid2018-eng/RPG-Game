@@ -6,7 +6,8 @@ public class Moves {
     private int x,y,w,h,damage;
     private int range, stamCost;  
     private int attackSpeed;
-    private ImageIcon icon;
+    private ImageIcon rightIcon, leftIcon;
+
 
 
     public Moves() {
@@ -18,10 +19,11 @@ public class Moves {
         w=0;
         h=0;
         stamCost = 0;
-        icon = new ImageIcon("punch.png");
+        rightIcon = new ImageIcon("punch_right.png");
+        leftIcon = new ImageIcon("punch_left.png");
     }
 
-    public Moves(int x, int y, int w, int h, int damage, int range, int attackSpeed, int stamCost, ImageIcon icon) {
+    public Moves(int x, int y, int w, int h, int damage, int range, int attackSpeed, int stamCost, ImageIcon rightIcon, ImageIcon leftIcon) {
         this.x = x;
         this.y = y;
         this.w = w;
@@ -30,25 +32,32 @@ public class Moves {
         this.range = range;
         this.attackSpeed = attackSpeed;
         this.stamCost = stamCost;
-        this.icon = icon;
+        this.rightIcon = rightIcon;
+        this.leftIcon = leftIcon;
     }
 
     public String toString() {
         return "Damage=" + damage + ", range=" + range + 
-        ", attackSpeed=" + attackSpeed + ", stamCost=" + stamCost + ", icon=" + icon;
+        ", attackSpeed=" + attackSpeed + ", stamCost=" + stamCost + ", rightIcon=" + rightIcon + ", leftIcon=" + leftIcon;
     }
 
     
 
-public void drawMoves(Graphics g2d, int fighterX, int fighterY, int fighterW, int index) {
-    if (icon != null && icon.getImage() != null) {
-        // Position to the right of the fighter (+ fighterW), plus padding (+ 20)
-        // Offset each additional move vertically (index * (h + 10)) or horizontally
-        int drawX = fighterX + fighterW + 20 + this.x;
-        int drawY = fighterY +  this.y;
+public void drawMoves(Graphics g2d, int fighterX, int fighterY, int fighterW, int index, boolean isFacingRight) {
+    
+    ImageIcon currentIcon = getIcon(isFacingRight);
 
-        g2d.drawImage(icon.getImage(), drawX, drawY, w, h, null);
+    if(currentIcon != null){
+        
+        int moveX = fighterX + fighterW + 20 + this.x;
+        int moveY = fighterY + this.y;
+
+        g2d.drawImage(currentIcon.getImage(), moveX, moveY, w, h, null);
+
+
+
     }
+    
 }
 
     public int getX() {
@@ -107,12 +116,20 @@ public void drawMoves(Graphics g2d, int fighterX, int fighterY, int fighterW, in
         this.attackSpeed = attackSpeed;
     }
 
-    public ImageIcon getIcon() {
-        return icon;
+    public ImageIcon getIcon(boolean isfacingRight) {
+       if(isfacingRight) {
+           return rightIcon;
+       } else {
+           return leftIcon;
+       }
     }
 
-    public void setIcon(ImageIcon icon) {
-        this.icon = icon;
+    public void setRightIcon(ImageIcon icon) {
+        this.rightIcon = rightIcon;
+    }
+
+    public void setLeftIcon(ImageIcon icon) {
+        this.leftIcon = leftIcon;
     }
 
     public int getStamCost() {

@@ -620,57 +620,78 @@ if (!fighterArea.isEmpty()) {
 
 
 private void updateEnemyAI(Enemies enemy) {
+     
+    
+    int playerCenter = mainFighter.getX() + (int)(mainFighter.getW() * 1.5 / 2);
 
-    int distance =
-        Math.abs(enemy.getX() - mainFighter.getX());
+    int enemyCenter = enemy.getX() - (int)(enemy.getW() / 2);
 
-    // player attacking
-    if(currentMove != null) {
 
-    if(enemy.getX() > mainFighter.getX()) {
-        enemy.setDx(5);
+    //establishes direction of enemy and player based on their x values
+    if(enemyCenter > playerCenter) {
+       enemy.setFacingRight(false);
+        mainFighter.setFacingRight(true);
+    }
+    else {
+        enemy.setFacingRight(true);
+        mainFighter.setFacingRight(false);
+    }
+
+
+    //distance between player and enemy
+    int playerRight = mainFighter.getX() + (int)(mainFighter.getW() * 1.5);
+    int enemyLeft = enemy.getX() - (int)enemy.getW();
+
+    int distance;
+
+    if(enemyCenter > playerCenter) {
+        distance = enemyLeft - playerRight;
     } else {
-        enemy.setDx(-5);
+        distance = playerRight - enemyLeft;
     }
 
-    return;
-}
+    distance = Math.max(0,distance);
 
-if(enemy.getStam() <= 0) {
-    enemy.setDx(2); // retreat
-    return;
-}
 
-    // too far
-    if(distance > 500) {
+    //range checking for enemy attack
+    int attackRange = 0;
 
-        if(enemy.getX() > mainFighter.getX()) {
+    for(Moves move : enemy.getMoves()) {
+        if(distance <= move.getRange() * 25) {
+            enemyAttack(enemy);
+            return;
+        }
+    }
+
+    //stam check
+    if(enemy.getStam() <= 0) {
+        if(enemyCenter > playerCenter) {
+            enemy.setDx(3);
+        } else {
             enemy.setDx(-3);
         }
-        else {
-            enemy.setDx(3);
-        }
-
         return;
     }
 
-    // too close
-    if(distance < 250) {
-
-        if(enemy.getX() > mainFighter.getX()) {
-            enemy.setDx(3);
+    //distance check for attack
+    if(distance > attackRange) {
+        if(enemyCenter > playerCenter) {
+            enemy.setDx(-enemy.getSpeed());
+        } else {
+            enemy.setDx(enemy.getSpeed());
         }
-        else {
-            enemy.setDx(-3);
-        }
-
         return;
+    } 
+    else {
+        enemy.setDx(0);
     }
 
-    // fighting range
-    enemy.setDx(0);
+    if(enemyCurrentMove == null) {
+        enemyAttack(enemy);
+    }
 
-    enemyAttack(enemy);
+
+    
 }
 
 private void enemyAttack(Enemies enemy) {

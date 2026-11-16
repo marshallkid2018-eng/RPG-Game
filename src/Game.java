@@ -27,6 +27,7 @@ public class Game extends JPanel  implements Runnable, KeyListener, MouseListene
     private long lastEnemyAttack = 0;
     private Moves enemyCurrentMove;
     private long lastStaminaRegen = 0;
+    private Boolean enemyAttackLanded = false;
 
 
 
@@ -349,7 +350,7 @@ if(currentMove == null) {
 } else {
 
     g.drawImage(
-        currentMove.getIcon().getImage(),
+        currentMove.getIcon(mainFighter.isFacingRight()).getImage(),
         mainFighter.getX() - cameraX,
         400,
         (int)(mainFighter.getW() * 1.5),
@@ -375,7 +376,7 @@ if(currentMove == null) {
 else {
 
     g.drawImage(
-        enemyCurrentMove.getIcon().getImage(),
+        enemyCurrentMove.getIcon(enemy.isFacingRight()).getImage(),
         enemy.getX() - cameraX,
         enemy.getY(),
         (int)enemy.getW(),
@@ -585,37 +586,37 @@ private boolean collisionDetection() {
 //System.out.println("calling it at least");
     boolean collisionDetected = false;
 
-    if(currentMove == null) {
-        //return;
-    }
-
-    if(enemies.isEmpty()) {
-       // return;
+    if(currentMove == null || enemies.isEmpty()) {
+        return false;
     }
 
     Enemies enemy = enemies.peek();
 
-    Polygon f = new Polygon();
-    f.addPoint(mainFighter.getX(), mainFighter.getY());
-    f.addPoint(mainFighter.getX() , mainFighter.getY()+ (int)mainFighter.getH());
-    f.addPoint(mainFighter.getX() + (int)(mainFighter.getW()*1.5) , mainFighter.getY()+ (int)(mainFighter.getH()/2));
+    Rectangle playerAttack = getAttackBounds(
+        mainFighter.getBounds(),
+        currentMove,
+        mainFighter.isFacingRight()
+    );
 
-    Polygon e = new Polygon();
-    e.addPoint(enemy.getX(), enemy.getY());
-    e.addPoint(enemy.getX() - (int)enemy.getW(), enemy.getY()+ (int)enemy.getH());
-    e.addPoint(enemy.getX() - (int)enemy.getW(), enemy.getY()+ (int)(enemy.getH()/2));
-
-    Area fighterArea = new Area(f);
-    Area enemyArea = new Area(e);
+    return playerAttack.intersects(enemy.getBounds());
     
-   fighterArea.intersect(enemyArea);
-if (!fighterArea.isEmpty()) { 
 
-        collisionDetected = true;
-        return true;
+}
+
+private boolean enemyCollisionDetection() {
+    if(enemyCurrentMove == null || enemies.isEmpty()) {
+        return false;
     }
-    return false;
 
+    Enemies enemy = enemies.peek();
+
+    Rectangle enemyAttack = getAttackBounds(
+        enemy.getBounds(),
+        enemyCurrentMove,
+        enemy.isFacingRight()
+    );
+
+    return enemyAttack.intersects(mainFighter.getBounds());
 }
 
 
@@ -624,7 +625,7 @@ private void updateEnemyAI(Enemies enemy) {
     
     int playerCenter = mainFighter.getX() + (int)(mainFighter.getW() * 1.5 / 2);
 
-    int enemyCenter = enemy.getX() - (int)(enemy.getW() / 2);
+    int enemyCenter = enemy.getX() + (int)(enemy.getW() / 2);
 
 
     //establishes direction of enemy and player based on their x values
@@ -639,22 +640,26 @@ private void updateEnemyAI(Enemies enemy) {
 
 
     //distance between player and enemy
-    int playerRight = mainFighter.getX() + (int)(mainFighter.getW() * 1.5);
+    int playerLeft = mainFighter.getX();
+    int playerRight = playerLeft + (int)(mainFighter.getW() * 1.5);
+
+
     int enemyLeft = enemy.getX() - (int)enemy.getW();
+    int enemyRight = enemyLeft + (int)enemy.getW();
 
     int distance;
 
     if(enemyCenter > playerCenter) {
         distance = enemyLeft - playerRight;
     } else {
-        distance = playerRight - enemyLeft;
+        distance = playerRight - enemyRight;
     }
 
     distance = Math.max(0,distance);
 
 
     //range checking for enemy attack
-    int attackRange = 0;
+    int attackRange = enemyCurrentMove.getRange();
 
     for(Moves move : enemy.getMoves()) {
         if(distance <= move.getRange() * 25) {
@@ -782,6 +787,33 @@ private Boolean loseCheck() {
     }
 }
 
+private Rectangle getAttackBounds( Rectangle attacker, Moves move, boolean isFacingRight) {
+   
+    int attackRange = move.getRange() * 50;
+
+    int attackHeight = attacker.height;
+
+
+    int attackY = attacker.y;
+
+    if(isFacingRight) {
+        return new Rectangle(
+            attacker.x + attacker.width,
+            attackY,
+            attackRange,
+            attackHeight
+        );
+    } else {
+        return new Rectangle(
+            attacker.x - attackRange,
+            attackY,
+            attackRange,
+            attackHeight
+        );
+    }
+
+}
+
 	 /* old collision method: private void checkMoveCollision() {
 
     if(currentMove == null) {
@@ -832,5 +864,6 @@ private Boolean loseCheck() {
         currentMove = null;
     }
 }*/
+
 
 }

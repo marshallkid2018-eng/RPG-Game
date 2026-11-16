@@ -23,7 +23,9 @@ public class Moves {
         leftIcon = new ImageIcon("punch_left.png");
     }
 
-    public Moves(int x, int y, int w, int h, int damage, int range, int attackSpeed, int stamCost, ImageIcon rightIcon, ImageIcon leftIcon) {
+    public Moves(int x, int y, int w, int h, 
+                int damage, int range, int attackSpeed, int stamCost,
+                ImageIcon rightIcon, ImageIcon leftIcon) {
         this.x = x;
         this.y = y;
         this.w = w;
@@ -34,6 +36,13 @@ public class Moves {
         this.stamCost = stamCost;
         this.rightIcon = rightIcon;
         this.leftIcon = leftIcon;
+    }
+
+    public Moves(int x, int y, int w, int h, 
+                int damage, int range, int attackSpeed, int stamCost,
+                ImageIcon icon) {
+     
+                    this(x, y, w, h, damage, range, attackSpeed, stamCost, icon, icon);
     }
 
     public String toString() {
@@ -116,20 +125,20 @@ public void drawMoves(Graphics g2d, int fighterX, int fighterY, int fighterW, in
         this.attackSpeed = attackSpeed;
     }
 
-    public ImageIcon getIcon(boolean isfacingRight) {
-       if(isfacingRight) {
-           return rightIcon;
+    public ImageIcon getIcon(boolean isFacingRight) {
+       if(isFacingRight) {
+           return rightIcon != null ? rightIcon : leftIcon;
        } else {
-           return leftIcon;
+           return leftIcon != null ? leftIcon : rightIcon;
        }
     }
 
     public void setRightIcon(ImageIcon icon) {
-        this.rightIcon = rightIcon;
+        this.rightIcon = icon;
     }
 
     public void setLeftIcon(ImageIcon icon) {
-        this.leftIcon = leftIcon;
+        this.leftIcon = icon;
     }
 
     public int getStamCost() {

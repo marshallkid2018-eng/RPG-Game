@@ -61,20 +61,29 @@ public class Fighters {
 
        int screenX = x - cameraX;
 
-       int trueW=(int)(w * 1.5);
-       int trueH=(int)(h * 1.5);
+        trueW=(int)(w * 1.5);
+        trueH=(int)(h * 1.5);
 
-        g2d.drawImage(pic.getImage(),
-    screenX, 400,
-    trueW, trueH,
-    null);
-
+        if(isFacingRight) {
+            g2d.drawImage(pic.getImage(), screenX, 400, trueW, trueH, null);
+        } else {
+            g2d.drawImage(pic.getImage(), screenX + trueW, 400, -trueW, trueH, null);
+        }
     }
 }
 
 public void move() {
 
+    if(dx > 0) {
+        isFacingRight = true;
+    } else if (dx < 0) {
+        isFacingRight = false;
+    }
+
     x += dx;
+
+    trueW = (int)(w * 1.5);
+    trueH = (int)(h * 1.5);
 
     if (x < 0) {
         x = 0;
@@ -90,7 +99,7 @@ public void move() {
 
 public void drawMoves(Graphics g2d) {
     for (int i = 0; i < moves.size(); i++) {
-        moves.get(i).drawMoves(g2d, x, y, (int)w, i);
+        moves.get(i).drawMoves(g2d, x, y, (int)w, i, isFacingRight);
     }
 }
 
@@ -248,7 +257,9 @@ public void drawMoves(Graphics g2d) {
         this.isFacingRight = isFacingRight;
     }
 
-    
+    public Rectangle getBounds() {
+        return new Rectangle(x, 400, (int)(w * 1.5), (int)(h * 1.5));
+    }
 
 
 

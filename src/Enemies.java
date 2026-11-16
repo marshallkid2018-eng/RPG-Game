@@ -46,20 +46,16 @@ public class Enemies {
     }
         }
 
-        public void drawEnemy(
-    Graphics g2d,
-    String screen,
-    int cameraX
-) {
+        public void drawEnemy(Graphics g2d, String screen, int cameraX) {
 
-    g2d.drawImage(
-        pic.getImage(),
-        x - cameraX,
-        y,
-        (int)w,
-        (int)h,
-        null
-    );
+            int screenX = x - cameraX;
+
+            if(isFacingRight) {
+                g2d.drawImage(pic.getImage(), screenX, y, (int)w, (int)h, null);
+            } else {
+                g2d.drawImage(pic.getImage(), screenX + (int)w, y, -(int)w, (int)h, null);
+            }
+           
 }
 
 

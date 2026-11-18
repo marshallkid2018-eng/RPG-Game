@@ -385,41 +385,32 @@ else {
     );
 }
 
+       if (currentMove != null && !attackLanded && collisionDetection()) {
        
+        int damage = getStrikeDamage(mainFighter, enemy, currentMove);
 
-       if(collisionDetection()
-    && currentMove != null
-    && !attackLanded){
+        enemy.takeDamage(damage);
 
-    int damage =
-        getStrikeDamage(
-            mainFighter,
-            enemy,
-            currentMove
-        );
+        int newStam = getStam(mainFighter, enemy, currentMove);
 
-    enemy.takeDamage(damage);
+        mainFighter.setStam(Math.max(0, newStam));
 
-    int newStam =
-    getStam(mainFighter, enemy, currentMove);
+        attackLanded = true;
 
-    mainFighter.setStam(
-     Math.max(0, newStam)
-    );
+        if (enemy.isDead()) {
+            enemies.remove();
+            enemyCurrentMove = null;
+        }
 
-attackLanded = true;
-
-    System.out.println(
-        "Hit for " + damage +
-        ". Enemy HP: " +
-        enemy.getHealth()
-    );
-
-    if(enemy.isDead()){
-        enemies.remove();
     }
-}
 
+    if(enemyCurrentMove != null && !enemyAttackLanded && enemyCollisionDetection()) {
+
+        int damage = enemyCurrentMove.getDamage() + enemy.getDamage();
+
+        mainFighter.setHealth(Math.max(0, mainFighter.getHealth() - damage));
+
+        enemyAttackLanded = true;
 
     }
 
@@ -530,7 +521,7 @@ if(enemy != null) {
         screenWidth - 250,
         68
     );
-}
+}}
 }
 
     private Queue<Enemies> setEs() {
@@ -623,78 +614,57 @@ private boolean enemyCollisionDetection() {
 private void updateEnemyAI(Enemies enemy) {
      
     
-    int playerCenter = mainFighter.getX() + (int)(mainFighter.getW() * 1.5 / 2);
+    int playerCenter = mainFighter.getX() + mainFighter.getBounds().width / 2;
 
     int enemyCenter = enemy.getX() + (int)(enemy.getW() / 2);
 
 
-    //establishes direction of enemy and player based on their x values
-    if(enemyCenter > playerCenter) {
-       enemy.setFacingRight(false);
-        mainFighter.setFacingRight(true);
-    }
-    else {
+    int distance = Math.abs(playerCenter - enemyCenter);
+
+    if(playerCenter > enemyCenter) {
         enemy.setFacingRight(true);
-        mainFighter.setFacingRight(false);
+    } else {
+       enemy.setFacingRight(false);
     }
 
+    mainFighter.setFacingRight(playerCenter >= enemyCenter);
 
-    //distance between player and enemy
-    int playerLeft = mainFighter.getX();
-    int playerRight = playerLeft + (int)(mainFighter.getW() * 1.5);
+    int playerRight = mainFighter.getX() + mainFighter.getBounds().width;
 
+    int enemyRight = enemy.getX() + (int)enemy.getW();
 
-    int enemyLeft = enemy.getX() - (int)enemy.getW();
-    int enemyRight = enemyLeft + (int)enemy.getW();
-
-    int distance;
+    int edgeDistance;
 
     if(enemyCenter > playerCenter) {
-        distance = enemyLeft - playerRight;
+        edgeDistance = mainFighter.getX() - enemyRight;
     } else {
-        distance = playerRight - enemyRight;
+        edgeDistance = enemy.getX() - playerRight;
     }
 
-    distance = Math.max(0,distance);
+    edgeDistance = Math.max(0, edgeDistance);
 
-
-    //range checking for enemy attack
-    int attackRange = enemyCurrentMove.getRange();
+    int attackRange = 0;
 
     for(Moves move : enemy.getMoves()) {
-        if(distance <= move.getRange() * 25) {
-            enemyAttack(enemy);
-            return;
-        }
+        attackRange = Math.max(attackRange, move.getRange() * 50);
     }
 
-    //stam check
-    if(enemy.getStam() <= 0) {
+    if( edgeDistance > attackRange){
+
         if(enemyCenter > playerCenter) {
-            enemy.setDx(3);
-        } else {
             enemy.setDx(-3);
-        }
-        return;
-    }
-
-    //distance check for attack
-    if(distance > attackRange) {
-        if(enemyCenter > playerCenter) {
-            enemy.setDx(-enemy.getSpeed());
         } else {
-            enemy.setDx(enemy.getSpeed());
+            enemy.setDx(3);
         }
+
         return;
-    } 
-    else {
-        enemy.setDx(0);
-    }
+}
+
+    enemy.setDx(0);
 
     if(enemyCurrentMove == null) {
         enemyAttack(enemy);
     }
-
 
     
 }
@@ -707,44 +677,39 @@ private void enemyAttack(Enemies enemy) {
         return;
     }
 
+    ArrayList<Moves> availableMoves = new ArrayList<Moves>();
+
+
+    for(Moves move : enemy.getMoves()) {
+        if(enemy.getStam() >= move.getStamCost()) {
+            availableMoves.add(move);
+        }
+    }
+
+    if(availableMoves.isEmpty()) {
+        return;
+    }
+
+    int randomMove = (int)(Math.random() * availableMoves.size());
+
+    Moves selectedMove = availableMoves.get(randomMove);
+
+    enemyCurrentMove = selectedMove;
+
+    enemy.setStam(enemy.getStam() - selectedMove.getStamCost());
+
     lastEnemyAttack = currentTime;
 
-    int randomMove =
-    (int)(Math.random() * enemy.getMoves().size());
+    enemyAttackLanded = false;
 
-    enemyCurrentMove = enemy.getMoves().get(randomMove);
+    Timer timer = new Timer(300, e -> {
+        enemyCurrentMove = null;
+        enemyAttackLanded = false;
+    });
 
-    if(enemy.getStam() <
-   enemyCurrentMove.getStamCost()) {
-
-    return;
-}
-
-int damage =
-    enemyCurrentMove.getDamage()
-    + enemy.getDamage();
-
-enemy.setStam(
-    Math.max( 0, enemy.getStam() - enemyCurrentMove.getStamCost())
-);
-
-    mainFighter.setHealth(
-        mainFighter.getHealth() - damage
-    );
-
-    Timer timer = new Timer(
-    300,
-    e -> enemyCurrentMove = null
-);
-
-timer.setRepeats(false);
-timer.start();
-
-    System.out.println(
-        "Enemy hit you for "
-        + damage
-        + " damage!"
-    );
+    timer.setRepeats(false);
+    timer.start();
+    
 }
 
 private Boolean loseCheck() {
